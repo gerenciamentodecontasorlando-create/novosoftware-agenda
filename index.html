@@ -1,385 +1,106 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0B1F2A" />
-  <title>Agenda Clínica • Dr. Orlando Abreu</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icon-192.png" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BTX Agenda</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="app">
-    <aside class="sidebar" aria-label="Navegação">
-      <div class="brand">
-        <img class="brand__icon" src="icon-192.png" alt="" />
-        <div class="brand__text">
-          <div class="brand__title">Agenda Clínica</div>
-          <div class="brand__subtitle">Dr. Orlando Abreu</div>
-        </div>
-      </div>
 
+  <header class="topbar">
+    <button class="iconbtn" id="btnMenu" aria-label="Menu">☰</button>
+    <div class="brand">
+      <div class="brandTitle">BTX Agenda</div>
+      <div class="brandSub">offline • autosave • PDF</div>
+    </div>
+    <div class="topActions">
+      <button class="btn" data-action="pdf">PDF</button>
+      <button class="btn" data-action="save">Salvar</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
       <nav class="nav">
-        <button class="nav__item is-active" data-route="agenda" type="button">
-          <span class="nav__dot"></span>
-          Agenda
-        </button>
-        <button class="nav__item" data-route="pacientes" type="button">
-          <span class="nav__dot"></span>
-          Pacientes
-        </button>
-        <button class="nav__item" data-route="documentos" type="button">
-          <span class="nav__dot"></span>
-          Documentos
-        </button>
-        <button class="nav__item" data-route="config" type="button">
-          <span class="nav__dot"></span>
-          Configurações
-        </button>
+        <button class="navbtn active" data-view="agenda">Agenda</button>
+        <button class="navbtn" data-view="pacientes">Pacientes</button>
+        <button class="navbtn" data-view="documentos">Documentos</button>
+        <button class="navbtn" data-view="config">Config</button>
       </nav>
 
-      <div class="sidebar__footer">
-        <div class="welcome" id="welcomeText">Bem-vindo, Dr. Orlando Abreu</div>
-        <div class="mini-actions">
-          <a class="wa" id="waLink" href="#" rel="noopener">WhatsApp</a>
-          <button class="ghost" id="btnBackupExport" type="button">Backup</button>
-          <button class="ghost" id="btnBackupImport" type="button">Importar</button>
-        </div>
-        <input type="file" id="backupFile" accept="application/json" hidden />
+      <div class="sideFooter">
+        <div class="small">Suporte</div>
+        <a class="whats" href="https://wa.me/5591999873835" target="_blank" rel="noopener">
+          WhatsApp
+        </a>
       </div>
     </aside>
 
     <main class="main">
-      <header class="topbar">
-        <button class="hamburger" id="hamburger" aria-label="Abrir menu" type="button">☰</button>
-
-        <div class="topbar__left">
-          <div class="title" id="viewTitle">Agenda</div>
-          <div class="subtitle" id="viewSubtitle">Seu dia, seus documentos, sua memória.</div>
-        </div>
-
-        <div class="topbar__right">
-          <div class="search">
-            <input id="globalSearch" placeholder="Buscar paciente, procedimento, documento..." autocomplete="off" />
-            <div class="search__hint" id="searchHint" hidden></div>
+      <!-- VIEWS -->
+      <section class="view show" id="view-agenda">
+        <h1>Agenda</h1>
+        <div class="card">
+          <div class="row">
+            <input id="agData" type="date" />
+            <input id="agBusca" type="search" placeholder="Buscar paciente..." />
+          </div>
+          <div class="list" id="agendaLista">
+            <div class="empty">Sem itens ainda. Comece adicionando um agendamento.</div>
+          </div>
+          <div class="row">
+            <button class="btn primary" data-action="novo-ag">+ Novo agendamento</button>
+            <button class="btn" data-action="pdf-agenda">PDF da agenda</button>
           </div>
         </div>
-      </header>
+      </section>
 
-      <!-- Views -->
-      <section class="view" id="viewAgenda">
+      <section class="view" id="view-pacientes">
+        <h1>Pacientes</h1>
+        <div class="card">
+          <div class="row">
+            <input id="pcBusca" type="search" placeholder="Buscar por nome/telefone..." />
+            <button class="btn primary" data-action="novo-paciente">+ Novo paciente</button>
+          </div>
+          <div class="list" id="pacientesLista">
+            <div class="empty">Cadastre o primeiro paciente.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-documentos">
+        <h1>Documentos</h1>
         <div class="grid">
-          <div class="card">
-            <div class="card__header">
-              <div class="card__title">Calendário</div>
-              <div class="card__tools">
-                <button class="iconbtn" id="calPrev" aria-label="Mês anterior" type="button">‹</button>
-                <button class="iconbtn" id="calToday" aria-label="Hoje" type="button">Hoje</button>
-                <button class="iconbtn" id="calNext" aria-label="Próximo mês" type="button">›</button>
-              </div>
-            </div>
-
-            <div class="calendar" id="miniCalendar" aria-label="Calendário pequeno"></div>
-
-            <div class="card__footer">
-              <div class="hint">Dica: dias com atendimento aparecem marcados.</div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card__header">
-              <div>
-                <div class="card__title" id="dayTitle">Dia</div>
-                <div class="card__subtitle" id="daySubtitle">Atendimentos e procedimentos</div>
-              </div>
-              <div class="card__tools">
-                <button class="btn" id="btnAddAppt" type="button">+ Atendimento</button>
-              </div>
-            </div>
-
-            <div class="daylist" id="dayList"></div>
-
-            <div class="card__footer">
-              <div class="hint">Clique em um paciente para registrar procedimentos e gerar PDFs.</div>
-            </div>
-          </div>
+          <button class="tile" data-action="doc-receita">Receituário (PDF)</button>
+          <button class="tile" data-action="doc-atestado">Atestado (PDF)</button>
+          <button class="tile" data-action="doc-laudo">Laudo (PDF)</button>
+          <button class="tile" data-action="doc-orcamento">Orçamento (PDF)</button>
         </div>
+        <div class="hint">Os PDFs devem sair limpos, sem “informações do software”.</div>
       </section>
 
-      <section class="view" id="viewPacientes" hidden>
+      <section class="view" id="view-config">
+        <h1>Configurações</h1>
         <div class="card">
-          <div class="card__header">
-            <div>
-              <div class="card__title">Pacientes</div>
-              <div class="card__subtitle">Cadastro simples, busca rápida.</div>
-            </div>
-            <div class="card__tools">
-              <button class="btn" id="btnAddPatient" type="button">+ Paciente</button>
-            </div>
-          </div>
+          <label class="lbl">Nome profissional</label>
+          <input id="cfgNome" placeholder="Seu nome" />
 
-          <div class="tablewrap">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>Contato</th>
-                  <th>Observações</th>
-                  <th class="right">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="patientTable"></tbody>
-            </table>
+          <label class="lbl">Registro (CRO/CRM)</label>
+          <input id="cfgReg" placeholder="Ex: CRO-PA 00000" />
+
+          <label class="lbl">Contato</label>
+          <input id="cfgContato" placeholder="Ex: (91) 99987-3835" />
+
+          <div class="row">
+            <button class="btn primary" data-action="salvar-config">Salvar configurações</button>
+            <button class="btn" data-action="backup">Exportar backup</button>
           </div>
         </div>
       </section>
-
-      <section class="view" id="viewDocumentos" hidden>
-        <div class="card">
-          <div class="card__header">
-            <div>
-              <div class="card__title">Documentos</div>
-              <div class="card__subtitle">Memória oficial: apenas documentos confirmados.</div>
-            </div>
-            <div class="card__tools">
-              <button class="ghost" id="btnTrashToggle" type="button">Ver Lixeira</button>
-              <button class="danger" id="btnPurgeTrash" type="button">Esvaziar Lixeira</button>
-            </div>
-          </div>
-
-          <div class="filters">
-            <select id="docTypeFilter">
-              <option value="">Todos os tipos</option>
-              <option value="receita">Receita</option>
-              <option value="atestado">Atestado</option>
-              <option value="recibo">Recibo</option>
-              <option value="orcamento">Orçamento</option>
-              <option value="laudo">Laudo</option>
-              <option value="ficha">Ficha Clínica</option>
-            </select>
-            <input id="docPatientFilter" placeholder="Filtrar por paciente..." />
-            <input id="docDateFrom" type="date" />
-            <input id="docDateTo" type="date" />
-            <button class="btn" id="btnDocFilter" type="button">Filtrar</button>
-            <button class="ghost" id="btnDocClear" type="button">Limpar</button>
-          </div>
-
-          <div class="list" id="docList"></div>
-        </div>
-      </section>
-
-      <section class="view" id="viewConfig" hidden>
-        <div class="grid grid--2">
-          <div class="card">
-            <div class="card__header">
-              <div>
-                <div class="card__title">Perfil do Profissional</div>
-                <div class="card__subtitle">Editável a qualquer momento (não aparece como “software” nos PDFs).</div>
-              </div>
-              <div class="card__tools">
-                <button class="btn" id="btnSaveProfile" type="button">Salvar</button>
-              </div>
-            </div>
-
-            <form class="form" id="profileForm">
-              <div class="row">
-                <label>Nome completo</label>
-                <input id="proName" value="Orlando Abreu Gomes da Silva" />
-              </div>
-              <div class="row">
-                <label>CRO</label>
-                <input id="proCRO" value="CRO-PA 5165" />
-              </div>
-              <div class="row">
-                <label>Título</label>
-                <input id="proTitle" value="Cirurgião-Dentista" />
-              </div>
-              <div class="row">
-                <label>Especialidade</label>
-                <input id="proSpec" value="Especialista em Cirurgia Buco-Maxilo-Facial" />
-              </div>
-              <div class="row">
-                <label>Endereço (rodapé do PDF)</label>
-                <textarea id="proAddress" placeholder="Rua..., nº..., Bairro..., Cidade/UF"></textarea>
-              </div>
-              <div class="row gridrow">
-                <div>
-                  <label>Telefone (texto)</label>
-                  <input id="proPhone" value="(91) 99987-3835" />
-                </div>
-                <div>
-                  <label>WhatsApp (para botão)</label>
-                  <input id="proWhats" value="5591999873835" />
-                  <div class="tinyhint">Use DDI+DDD+Número (ex.: 5591...)</div>
-                </div>
-              </div>
-              <div class="row">
-                <label>Mensagem do WhatsApp (opcional)</label>
-                <input id="proWhatsMsg" value="Olá, Dr. Orlando Abreu. Gostaria de mais informações." />
-              </div>
-
-              <div class="row gridrow">
-                <div class="switch">
-                  <input type="checkbox" id="showPhoneInPdf" checked />
-                  <label for="showPhoneInPdf">Mostrar telefone nos PDFs (Recibo/Orçamento por padrão)</label>
-                </div>
-                <div class="switch">
-                  <input type="checkbox" id="enableTrash" checked />
-                  <label for="enableTrash">Usar lixeira (recomendado)</label>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          <div class="card">
-            <div class="card__header">
-              <div>
-                <div class="card__title">Segurança e Memória</div>
-                <div class="card__subtitle">Offline-first com IndexedDB + backup exportável.</div>
-              </div>
-            </div>
-
-            <div class="stack">
-              <div class="callout">
-                <div class="callout__title">Como funciona a memória</div>
-                <div class="callout__text">
-                  Documentos nascem como <b>rascunho</b> e só entram na memória oficial quando você <b>confirmar</b>.
-                  Você pode excluir (ou mandar para lixeira) quando quiser.
-                </div>
-              </div>
-
-              <div class="callout">
-                <div class="callout__title">Botão exclusivo para PDF</div>
-                <div class="callout__text">
-                  Os documentos são gerados em PDF com um botão dedicado. O PDF abre na tela e pode ser salvo/compartilhado/imprimido pelo próprio visualizador do dispositivo.
-                </div>
-              </div>
-
-              <div class="callout dangerzone">
-                <div class="callout__title">Zona de risco</div>
-                <div class="callout__text">Use com cautela.</div>
-                <div class="row gridrow">
-                  <button class="danger" id="btnNuke" type="button">Apagar TUDO (reset)</button>
-                  <button class="ghost" id="btnReindex" type="button">Reparar/Reconstruir índices</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Modal: Atendimento -->
-      <div class="modal" id="modalAppt" hidden>
-        <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="apptTitle">
-          <div class="modal__header">
-            <div>
-              <div class="modal__title" id="apptTitle">Atendimento</div>
-              <div class="modal__subtitle" id="apptSubtitle"></div>
-            </div>
-            <button class="iconbtn" id="apptClose" aria-label="Fechar" type="button">✕</button>
-          </div>
-
-          <div class="modal__body">
-            <div class="split">
-              <div class="pane">
-                <div class="sectionTitle">Paciente</div>
-                <div class="row gridrow">
-                  <div>
-                    <label>Nome</label>
-                    <input id="apptPatientName" placeholder="Selecione ou digite..." list="patientDatalist" />
-                    <datalist id="patientDatalist"></datalist>
-                  </div>
-                  <div>
-                    <label>Horário (opcional)</label>
-                    <input id="apptTime" placeholder="Ex.: 08:30" />
-                  </div>
-                </div>
-
-                <div class="row">
-                  <label>Status</label>
-                  <select id="apptStatus">
-                    <option value="planejado">Planejado</option>
-                    <option value="realizado">Realizado</option>
-                    <option value="faltou">Faltou</option>
-                    <option value="remarcado">Remarcado</option>
-                  </select>
-                </div>
-
-                <div class="sectionTitle">Ficha clínica (visível no atendimento)</div>
-                <div class="row">
-                  <label>Resumo / Observações</label>
-                  <textarea id="apptFicha" placeholder="Anamnese resumida, alertas, observações..."></textarea>
-                </div>
-
-                <div class="sectionTitle">Procedimentos do dia</div>
-                <div class="row gridrow">
-                  <input id="procInput" placeholder="Ex.: Exodontia 18, Sutura, Revisão..." />
-                  <button class="btn" id="btnAddProc" type="button">Adicionar</button>
-                </div>
-
-                <div class="chips" id="procChips"></div>
-
-                <div class="row">
-                  <label>Notas do atendimento</label>
-                  <textarea id="apptNotes" placeholder="Evolução, conduta, orientações..."></textarea>
-                </div>
-              </div>
-
-              <div class="pane">
-                <div class="sectionTitle">Documentos (rascunho → confirmar)</div>
-                <div class="docgrid">
-                  <button class="docbtn" data-doc="receita" type="button">Receita</button>
-                  <button class="docbtn" data-doc="atestado" type="button">Atestado</button>
-                  <button class="docbtn" data-doc="recibo" type="button">Recibo</button>
-                  <button class="docbtn" data-doc="orcamento" type="button">Orçamento</button>
-                  <button class="docbtn" data-doc="laudo" type="button">Laudo</button>
-                  <button class="docbtn" data-doc="ficha" type="button">Ficha Clínica</button>
-                </div>
-
-                <div class="sectionTitle">Editor do documento</div>
-                <div class="row">
-                  <label>Tipo</label>
-                  <input id="docType" disabled />
-                </div>
-                <div class="row">
-                  <label>Conteúdo</label>
-                  <textarea id="docBody" placeholder="Digite aqui o conteúdo do documento..."></textarea>
-                </div>
-
-                <div class="row gridrow">
-                  <button class="ghost" id="btnSaveDraft" type="button">Salvar rascunho</button>
-                  <button class="btn" id="btnConfirmDoc" type="button">Confirmar (entra na memória)</button>
-                </div>
-
-                <div class="row">
-                  <button class="btn btn--pdf" id="btnPdfOnly" type="button">Gerar PDF</button>
-                  <div class="tinyhint">Botão exclusivo para PDF. O PDF abre na tela.</div>
-                </div>
-
-                <div class="row">
-                  <label>Pré-visualização (HTML)</label>
-                  <div class="preview" id="docPreview"></div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          <div class="modal__footer">
-            <button class="ghost" id="btnDeleteAppt" type="button">Excluir atendimento</button>
-            <button class="btn" id="btnSaveAppt" type="button">Salvar atendimento</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Toast -->
-      <div class="toast" id="toast" hidden></div>
     </main>
   </div>
 
-  <!-- jsPDF (cached by service worker after first load) -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" crossorigin="anonymous"></script>
-  <script src="app.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
